@@ -27,12 +27,12 @@ export class AuthService {
                 !checkTypes(body.email, 'string')) {
                 return ctx.json({
                     message: 'Invalid parameters'
-                }, statusCodes.C400.BAD_REQUEST as StatusCode);
+                }, statusCodes.C400.BAD_REQUEST);
             }
             console.log(body);
             return ctx.json({
                 message: 'User registered'
-            }, statusCodes.C200.CREATED as StatusCode);
+            }, statusCodes.C200.CREATED);
         });
 
         this.auth.post('/login', async (ctx) => {
@@ -40,11 +40,11 @@ export class AuthService {
             if (!checkTypes(body.username, 'string') || !checkTypes(body.password, 'string')) {
                 return ctx.json({
                     message: 'Invalid parameters'
-                }, 400);
+                }, statusCodes.C400.BAD_REQUEST);
             }
             return ctx.json({
                 message: 'User logged in'
-            }, 200);
+            }, statusCodes.C200.OK);
         });
     }
 }
