@@ -4,4 +4,3 @@ export function checkTypes(obj: any, type: any) {
     }
     return true;
 }
-
