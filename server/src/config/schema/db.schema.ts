@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, timestamp, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const subscriptionTypeEnum = pgEnum("subscription_type", ["free", "premium", "student"])
 export const isVerifiedEnum = pgEnum("is_verified", ["true", "false"])
@@ -11,11 +11,16 @@ export const UserTable = pgTable("Users", {
     id: uuid("id").primaryKey().notNull().defaultRandom().unique(),
     username: varchar("username").notNull().unique(),
     password: varchar("password").notNull(),
-    email: varchar("email").notNull().unique(),
+    email: varchar("email").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     subscriptionType: subscriptionTypeEnum("subscription_type").notNull().default("free"),
     subscriptionExpirationDate: timestamp("subscription_expiration_date").notNull().defaultNow(),
     isVerified: isVerifiedEnum('is_verified').notNull().default("false"),
+}, table => {
+    return {
+        emailIndex: uniqueIndex("email_index").on(table.email),
+        idIndex: uniqueIndex("id_index").on(table.id),
+    }
 });
 
 export const PlaylistTable = pgTable("Playlists", {
