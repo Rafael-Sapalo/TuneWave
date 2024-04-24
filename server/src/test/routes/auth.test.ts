@@ -10,7 +10,7 @@ describe('Auth Routes', () => {
         test('POST /api/auth/register', async () => {
             const res = await app.request('/api/auth/register', {
                 method: 'POST',
-                body: JSON.stringify({ username: 'test', password: 'test', email: `test.${Math.random()}@test.com`})
+                body: JSON.stringify({ username: `test-${Math.random()}`, password: 'test', email: `test.${Math.random()}@test.com`})
             })
             expect(res.status).toBe(statusCodes.C200.CREATED)
             expect(await res.json()).toEqual({ message: "User registered" })
