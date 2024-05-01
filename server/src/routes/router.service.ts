@@ -6,10 +6,12 @@ import { statusCodes } from "../utils/statusCodes";
 import { db } from "../config/db";
 import { UserTable } from "../config/schema/db.schema";
 import { HTTPException } from "hono/http-exception";
+import { eq } from "drizzle-orm";
 
 export class RouterService {
-    private app = new Hono().basePath("/api");
+    private app = new Hono();
     private authRouter = new AuthService().getAuth();
+    private readonly baseRoute = `/api`;
 
     constructor() {
         this.initGlobalMiddleware();
@@ -32,12 +34,12 @@ export class RouterService {
 
     private initRoutes() {
 
-        this.app.route(`/auth`, this.authRouter);
-        this.app.get(`/getAllUsers`, async (ctx) => {
+        this.app.route(`${this.baseRoute}/auth`, this.authRouter);
+        this.app.get(`${this.baseRoute}/getAllUsers`, async (ctx) => {
             const users = await db.transaction(async (trx) => {
                 const users = await db.query.UserTable.findMany();
                 if (!users) {
-                    return await trx.rollback();
+                    return trx.rollback();
                 }
                 return users;
             });
@@ -49,7 +51,7 @@ export class RouterService {
                 User: users,
             }, statusCodes.C200.OK);
         });
-        this.app.get(`/`, async (ctx) => {
+        this.app.get(`${this.baseRoute}/`, async (ctx) => {
             return ctx.json({
                 message: "Hello, World!",
             }, statusCodes.C200.OK);
