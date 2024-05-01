@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const userSchema = z.object({
     username: z.string(),
     password: z.string().min(8),
-    email: z.string().email(),
+    email: z.string().email({ message: 'Invalid email'}),
 })
 
 export type User = z.infer<typeof userSchema>
