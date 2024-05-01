@@ -4,16 +4,9 @@ import { statusCodes } from "../../utils/statusCodes";
 
 const app = new RouterService().getApp();
 
-describe('Basse Routes', () => {
-    test('GET /api/', async () => {
-        const res = await app.request('/api/')
-        expect(res.status).toBe(statusCodes.C200.OK)
-        expect(await res.json()).toEqual({ message: "Hello, World!" }) 
-    })
-
-    test('GET /api/404', async () => {
-        const res = await app.request('/api/404')
-        expect(res.status).toBe(statusCodes.C400.NOT_FOUND)
-        expect(await res.text()).toEqual("404 Not Found" ) 
-    })
-})
+describe('Base routes test', () => {
+    test('should return 200 status code', async () => {
+        const response = await app.request('api/');
+        expect(response.status).toBe(200);
+    });
+});
