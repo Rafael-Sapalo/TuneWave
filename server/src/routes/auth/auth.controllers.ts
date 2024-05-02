@@ -1,12 +1,15 @@
 import { registerErrorMessagesArray } from "../../utils/error.message";
-import { checkTypes, isStrongPassword } from '../../utils/checktypes';
+import { isStrongPassword } from '../../utils/checktypes';
 import { UserTable } from '../../config/schema/db.schema';
 import { statusCodes } from '../../utils/statusCodes';
-import { userSchema } from "../../utils/zod.schema";
+import { UserLogSchema, userSchema } from "../../utils/zod.schema";
 import { zValidator } from "@hono/zod-validator";
 import { passwordSec } from '../../utils/Types';
 import { createFactory } from "hono/factory";
 import { db } from '../../config/db';
+import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { password } from "bun";
 
 export class AuthController {
     private authFactory = createFactory();
@@ -28,20 +31,23 @@ export class AuthController {
                 password: await passwordSec.hashing(body.password.toString()),
             }
         );
-        return ctx.json({
-            message: 'User registered',
-        }, statusCodes.C200.CREATED);
+        return ctx.json({ message: 'User registered' }, statusCodes.C200.CREATED);
     });
 
-    public loginFactory = this.authFactory.createHandlers(async (ctx) => {
-        const body = await ctx.req.json();
-        if (!checkTypes(body.username, 'string') || !checkTypes(body.password, 'string')) {
-            return ctx.json({
-                message: 'Invalid parameters'
-            }, statusCodes.C400.BAD_REQUEST);
-        }
+    readonly loginFactory = this.authFactory.createHandlers(zValidator('json', UserLogSchema), async (ctx) => {
+        const body = ctx.req.valid('json');
+        const user = await db.select({email: UserTable.email, password: UserTable.password}).from(UserTable).where(eq(UserTable.username, body.username.toString()));
+        if (!user) return ctx.json({ message: 'User not found' }, statusCodes.C400.NOT_FOUND);
+        const compare = await passwordSec.comparing(body.password.toString(), user[0].password);
+        if (!compare) return ctx.json({ message: 'Invalid password' }, statusCodes.C400.BAD_REQUEST);
         return ctx.json({
-            message: 'User logged in'
+            message: 'User logged in',
         }, statusCodes.C200.OK);
     });
+
+    readonly logoutFactory = this.authFactory.createHandlers(async (ctx) => {
+        return ctx.json({
+            message: 'Log Out'
+        })
+    })
 }

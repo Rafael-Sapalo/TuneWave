@@ -1,12 +1,10 @@
-import { Hono } from "hono";
-import { logger } from "hono/logger";
+import { HTTPException } from "hono/http-exception";
+import { statusCodes } from "../utils/statusCodes";
 import { AuthService } from "./auth/auth.service";
 import { poweredBy } from "hono/powered-by";
-import { statusCodes } from "../utils/statusCodes";
+import { logger } from "hono/logger";
 import { db } from "../config/db";
-import { UserTable } from "../config/schema/db.schema";
-import { HTTPException } from "hono/http-exception";
-import { eq } from "drizzle-orm";
+import { Hono } from "hono";
 
 export class RouterService {
     private app = new Hono();
@@ -19,7 +17,6 @@ export class RouterService {
     }
 
     private initGlobalMiddleware() {
-        // Add global middleware here
         this.app.use(logger());
         this.app.use(poweredBy());
         this.app.notFound(async (ctx) => {
