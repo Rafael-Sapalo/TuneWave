@@ -24,7 +24,7 @@ describe('Auth Routes', () => {
             const body = {
                 email: validMail,
                 username: `test${Math.floor(Math.random() * 10 ** 6)}`,
-                password: `${generateStrongPassword(12)}`.toString()
+                password: `${generateStrongPassword(20)}`.toString()
             }
             const response = await app.request('/api/auth/register', {
                 method: 'POST',
