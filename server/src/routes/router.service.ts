@@ -1,13 +1,14 @@
 import { LibraryService } from "./library/library.service";
 import { UserTable } from "../config/schema/db.schema";
+import { limiter } from "../middleware/rateLimiter";
 import { HTTPException } from "hono/http-exception";
 import { statusCodes } from "../utils/statusCodes";
 import { AuthService } from "./auth/auth.service";
 import { poweredBy } from "hono/powered-by";
 import { logger } from "hono/logger";
 import { db } from "../config/db";
-import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { Hono } from "hono";
 
 export class RouterService {
     private app = new Hono().basePath('/api');
@@ -21,6 +22,7 @@ export class RouterService {
     }
 
     private initGlobalMiddleware() {
+        this.app.use(limiter);
         this.app.use(cors());
         this.app.use(logger());
         this.app.use(poweredBy());
