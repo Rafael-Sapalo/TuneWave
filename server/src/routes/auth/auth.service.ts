@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 
 export class AuthService extends AuthController {
 
-    private auth = new Hono();
+    private auth = new Hono().basePath('/auth');
     constructor () {
         super()
         this.initRoutes();
