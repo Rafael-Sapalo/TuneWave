@@ -17,6 +17,7 @@
   "dependencies": {
     "drizzle-orm": "^0.30.9",
     "hono": "^4.2.4",
+    "hono-rate-limiter": "^0.3.0",
     "pg": "^8.11.5",
     "postgres": "^3.4.4",
     "react-email": "^2.1.2",

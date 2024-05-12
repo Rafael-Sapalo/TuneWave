@@ -7,6 +7,7 @@ import { poweredBy } from "hono/powered-by";
 import { logger } from "hono/logger";
 import { db } from "../config/db";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 export class RouterService {
     private app = new Hono().basePath('/api');
@@ -20,6 +21,7 @@ export class RouterService {
     }
 
     private initGlobalMiddleware() {
+        this.app.use(cors());
         this.app.use(logger());
         this.app.use(poweredBy());
         this.app.notFound((ctx) => {
