@@ -6,4 +6,6 @@ export const authErrorMessage: string[] = [
 ];
 
 export const loginErrorMessagesArray: string[] = [
+    "User not found",
+    "Invalid password",
 ];
