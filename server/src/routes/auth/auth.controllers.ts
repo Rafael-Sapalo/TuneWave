@@ -1,5 +1,5 @@
-import { authErrorMessage } from "../../utils/error.message";
 import { UserLogSchema, userSchema } from "../../utils/zod.schema";
+import { authErrorMessage } from "../../utils/error.message";
 import { isStrongPassword } from '../../utils/checktypes';
 import { UserTable } from '../../config/schema/db.schema';
 import { statusCodes } from '../../utils/statusCodes';
@@ -31,9 +31,8 @@ export class AuthController {
                 }
             );
         } catch (error) {
-            return ctx.json({ message: "user already exist" }, statusCodes.C400.UNAUTHORIZED);
+            return ctx.json({ message: "user already exist" }, statusCodes.C400.BAD_REQUEST);
         }
-        if (!user) return ctx.json({ message: "user already exist" }, statusCodes.C400.BAD_REQUEST);
         //const mail = await (new MailService()).sendEmail(body.email.toString(), 'Verify your email', 'Please verify your email');
         return ctx.json({ message: 'User registered' }, statusCodes.C200.CREATED);
     });
