@@ -5,9 +5,11 @@ import { UserTable } from '../../config/schema/db.schema';
 import { statusCodes } from '../../utils/statusCodes';
 import { zValidator } from "@hono/zod-validator";
 import { passwordSec } from '../../utils/Types';
+import { setSignedCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { db } from '../../config/db';
 import { eq } from "drizzle-orm";
+import { sign } from "hono/jwt";
 //import {MailService} from "../../services/mail/email.service.tsx";
 
 export class AuthController {
@@ -40,16 +42,29 @@ export class AuthController {
     readonly loginFactory = this.authFactory.createHandlers(zValidator('json', UserLogSchema), async (ctx) => {
         const body = ctx.req.valid('json');
         let user;
+        //TODO: add a the function that checks the local storage if the user was already logged in
         try {
             user = await db.select({
                 email: UserTable.email, password: UserTable.password
-            }).from(UserTable).where(eq(UserTable.username, body.username.toString()));
+            }).from(UserTable).where(eq(UserTable.username, body.username));
         } catch (error) {
             return ctx.json({ message: authErrorMessage[2] as string }, statusCodes.C400.NOT_FOUND);
         }
         const compare = await passwordSec.comparing(body.password.toString(), user[0].password);
         if (!compare)
             return ctx.json({ message: authErrorMessage[3] }, statusCodes.C400.BAD_REQUEST);
+        const playload = {
+            id: user[0].email,
+            role: 'user',
+            exp: 7 * 24 * 60 * 60 * 1000
+        };
+        const token = await sign(playload, process.env.TOKEN_SECRET as string);
+        await setSignedCookie(ctx, 'Set-cookie', process.env.COOKIE_SECRET as string, token, { 
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            prefix: 'secure'
+        });
         return ctx.json({ message: 'User logged in' }, statusCodes.C200.OK);
     });
 

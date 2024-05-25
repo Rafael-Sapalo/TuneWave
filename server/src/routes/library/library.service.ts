@@ -15,7 +15,7 @@ export class LibraryService {
         this.lib.route('/', (new PlaylistService()).PlaylistInstance());
     }
 
-    public LibInstance(): any {
+    public LibInstance() {
         return this.lib;
     }
 }
