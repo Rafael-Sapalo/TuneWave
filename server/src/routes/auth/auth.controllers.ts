@@ -5,7 +5,7 @@ import { UserTable } from '../../config/schema/db.schema';
 import { statusCodes } from '../../utils/statusCodes';
 import { zValidator } from "@hono/zod-validator";
 import { passwordSec } from '../../utils/Types';
-import { setSignedCookie } from "hono/cookie";
+import {deleteCookie, setSignedCookie} from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { db } from '../../config/db';
 import { eq } from "drizzle-orm";
@@ -42,7 +42,6 @@ export class AuthController {
     readonly loginFactory = this.authFactory.createHandlers(zValidator('json', UserLogSchema), async (ctx) => {
         const body = ctx.req.valid('json');
         let user;
-        //TODO: add a the function that checks the local storage if the user was already logged in
         try {
             user = await db.select({
                 email: UserTable.email, password: UserTable.password
@@ -53,13 +52,13 @@ export class AuthController {
         const compare = await passwordSec.comparing(body.password.toString(), user[0].password);
         if (!compare)
             return ctx.json({ message: authErrorMessage[3] }, statusCodes.C400.BAD_REQUEST);
-        const playload = {
+        const payload = {
             id: user[0].email,
             role: 'user',
             exp: 7 * 24 * 60 * 60 * 1000
         };
-        const token = await sign(playload, process.env.TOKEN_SECRET as string);
-        await setSignedCookie(ctx, 'Set-cookie', process.env.COOKIE_SECRET as string, token, { 
+        const token = await sign(payload, process.env.TOKEN_SECRET as string);
+        await setSignedCookie(ctx, 'Set-log-cookie', process.env.COOKIE_SECRET as string, token, {
             httpOnly: true,
             secure: true,
             sameSite: 'Strict',
@@ -69,6 +68,10 @@ export class AuthController {
     });
 
     readonly logoutFactory = this.authFactory.createHandlers(async (ctx) => {
-        return ctx.json({ message: 'Log Out' });
+        const deletedCookie = deleteCookie(ctx, 'Set-log-cookie')
+        if (!deletedCookie)
+            return ctx.json({ message: 'No cookie to delete, logged out !!' });
+        return ctx.json({ message: 'Log Out !!' });
     })
 }
+
